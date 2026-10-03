@@ -1,0 +1,16 @@
+{
+  "name": "Gomoku 五子棋",
+  "short_name": "Gomoku",
+  "description": "An offline five-in-a-row game with two-player and single-player computer modes.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3ece0",
+  "theme_color": "#f3ece0",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

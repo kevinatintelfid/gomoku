@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3ece0">
+  <meta name="description" content="An offline five-in-a-row (Gomoku) game with two-player and single-player computer modes.">
+  <title>Gomoku - 五子棋</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Gomoku">
+  <link rel="stylesheet" href="styles.css">
+  <script src="game.js" defer></script>
+  <script src="ai.js" defer></script>
+  <script src="lucide.min.js" defer></script>
+  <script src="app.js" defer></script>
+  <script>
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      var hadController = Boolean(navigator.serviceWorker.controller);
+      var reloading = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (!hadController) { hadController = true; return; }
+        if (reloading) return;
+        reloading = true;
+        window.location.reload();
+      });
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").then(function (registration) {
+          registration.update();
+          setInterval(function () { registration.update(); }, 60 * 60 * 1000);
+          document.addEventListener("visibilitychange", function () {
+            if (!document.hidden) registration.update();
+          });
+        }).catch(function () {});
+      });
+    }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./index.html" aria-label="Gomoku home">
+      <img src="favicon.svg" width="34" height="34" alt="">
+      <span>gomoku<span class="brand-dot">.</span></span>
+    </a>
+    <div class="header-end"><span class="edition">FIVE IN A ROW</span><span class="offline-dot" aria-hidden="true"></span><span>Offline ready</span></div>
+  </header>
+
+  <main>
+    <div class="page-heading">
+      <div><div class="eyebrow">五子棋</div><h1>Gomoku<span class="title-dot">.</span></h1></div>
+      <div class="score-record">
+        <div class="score-chip"><span class="disc black" aria-hidden="true"></span><div><span class="eyebrow">BLACK</span><strong id="score-black">0</strong></div></div>
+        <div class="score-chip"><span class="disc white" aria-hidden="true"></span><div><span class="eyebrow">WHITE</span><strong id="score-white">0</strong></div></div>
+      </div>
+    </div>
+
+    <div class="game-layout">
+      <section class="board-section" aria-label="Gomoku board">
+        <div class="board-topline">
+          <div class="turn-label"><span class="disc" id="turn-disc"></span><strong id="turn-text">Black to move</strong></div>
+          <div class="move-group"><i data-lucide="circle-dot" aria-hidden="true"></i><span id="move-count">0 moves</span></div>
+        </div>
+        <div class="board-frame">
+          <div id="board" class="board" role="grid" aria-label="15 by 15 Gomoku board">
+            <div class="grid" aria-hidden="true"></div>
+            <div class="stars" aria-hidden="true"></div>
+            <div id="stones" class="stones"></div>
+          </div>
+          <div id="board-cover" class="board-cover" hidden>
+            <div id="cover-icon" class="cover-icon"><i data-lucide="trophy"></i></div>
+            <h2 id="cover-title">Black wins</h2>
+            <p id="cover-sub">Five in a row.</p>
+            <button id="cover-new" class="primary-button">New game <i data-lucide="arrow-right"></i></button>
+          </div>
+        </div>
+        <p id="announcement" class="announcement" role="status" aria-live="polite"></p>
+      </section>
+
+      <aside class="controls" aria-label="Game controls">
+        <div class="mode-block">
+          <span class="eyebrow">OPPONENT</span>
+          <div class="mode-switch" role="group" aria-label="Opponent">
+            <button id="mode-ai" aria-pressed="true"><i data-lucide="cpu"></i>Computer</button>
+            <button id="mode-pvp" aria-pressed="false"><i data-lucide="users"></i>Two players</button>
+          </div>
+        </div>
+
+        <div id="ai-options" class="ai-options">
+          <div class="option-row">
+            <span class="eyebrow">DIFFICULTY</span>
+            <div class="difficulty-wrap">
+              <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+              <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div class="option-row">
+            <span class="eyebrow">YOU PLAY</span>
+            <div class="mode-switch small" role="group" aria-label="Your stone">
+              <button id="play-black" aria-pressed="true"><span class="disc black"></span>Black · first</button>
+              <button id="play-white" aria-pressed="false"><span class="disc white"></span>White</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="new-game" class="primary-button">New game <i data-lucide="refresh-cw"></i></button>
+
+        <div class="tools" role="group" aria-label="Game tools">
+          <button id="undo" class="tool-button" title="Undo last move" aria-label="Undo"><i data-lucide="undo-2"></i><span>Undo</span></button>
+          <button id="restart" class="tool-button" title="Restart this game" aria-label="Restart"><i data-lucide="rotate-ccw"></i><span>Restart</span></button>
+        </div>
+
+        <section class="how-to" aria-label="How to play">
+          <span class="eyebrow">HOW TO WIN</span>
+          <p>Take turns placing stones on the line crossings. The first to line up <strong>five in a row</strong> — across, down, or diagonally — wins. Black always moves first.</p>
+        </section>
+      </aside>
+    </div>
+    <footer><span><i data-lucide="circle-check" aria-hidden="true"></i><span id="save-status">Saved on this device</span></span><span>Line up five.</span></footer>
+  </main>
+</body>
+</html>
